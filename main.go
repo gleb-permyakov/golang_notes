@@ -1,6 +1,7 @@
 package main
 
 import (
+	"notes/handlers"
 	"notes/inits"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,6 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	r.POST("/users")
+	r.POST("/users", handlers.Signup)
 	r.Run()
 }
