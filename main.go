@@ -2,7 +2,7 @@ package main
 
 import (
 	"io"
-	"log/slog"
+	"log"
 	"notes/inits"
 	"notes/internal/handlers"
 	"notes/pkg/logger"
@@ -19,23 +19,26 @@ func init() {
 
 func main() {
 
-	log := logger.New()
+	loga := logger.New()
+	loga.Info("message")
 
 	// Полностью отключаем вывод Gin
 	gin.DefaultWriter = io.Discard
 	// gin.DefaultErrorWriter = io.Discard
 
-	// Создаем Gin без дефолтных middleware
 	r := gin.New()
 
-	r.POST("/users", handlers.Signup)
-	r.POST("/users/{id}/notes", handlers.CreateNote)
+	r.POST("/users", handlers.Signup)                // ready
+	r.POST("/users/{id}/notes", handlers.CreateNote) // TODO
 
-	log.Info("Server started", "port", os.Getenv("PORT"))
+	logerr := log.New(os.Stderr, "[ warn  ]", log.Ltime|log.Lshortfile)
+	logerr.Print("any shit")
+
+	// log.Info("Server started", "port", os.Getenv("PORT"))
 
 	err := r.Run()
 	if err != nil {
-		slog.Error("error at starting server")
+		// log.Error("error at starting server")
 	}
 
 }
