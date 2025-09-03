@@ -1,6 +1,6 @@
 package inits
 
-import "notes/models"
+import "notes/internal/models"
 
 func DoTablesDB() {
 	DB.AutoMigrate(&models.User{}, &models.Note{})

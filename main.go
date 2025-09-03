@@ -1,8 +1,12 @@
 package main
 
 import (
-	"notes/handlers"
+	"io"
+	"log/slog"
 	"notes/inits"
+	"notes/internal/handlers"
+	"notes/pkg/logger"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +18,24 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
+
+	log := logger.New()
+
+	// Полностью отключаем вывод Gin
+	gin.DefaultWriter = io.Discard
+	// gin.DefaultErrorWriter = io.Discard
+
+	// Создаем Gin без дефолтных middleware
+	r := gin.New()
+
 	r.POST("/users", handlers.Signup)
-	r.Run()
+	r.POST("/users/{id}/notes", handlers.CreateNote)
+
+	log.Info("Server started", "port", os.Getenv("PORT"))
+
+	err := r.Run()
+	if err != nil {
+		slog.Error("error at starting server")
+	}
+
 }
