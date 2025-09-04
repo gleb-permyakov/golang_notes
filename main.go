@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"log"
 	"notes/inits"
 	"notes/internal/handlers"
 	"notes/pkg/logger"
@@ -18,9 +17,9 @@ func init() {
 }
 
 func main() {
-
+	// init my logger "loga"
 	loga := logger.New()
-	loga.Info("message")
+	loga.Warn("DEV Level")
 
 	// Полностью отключаем вывод Gin
 	gin.DefaultWriter = io.Discard
@@ -31,14 +30,10 @@ func main() {
 	r.POST("/users", handlers.Signup)                // ready
 	r.POST("/users/{id}/notes", handlers.CreateNote) // TODO
 
-	logerr := log.New(os.Stderr, "[ warn  ]", log.Ltime|log.Lshortfile)
-	logerr.Print("any shit")
-
-	// log.Info("Server started", "port", os.Getenv("PORT"))
+	loga.Info("Server started", "port =", os.Getenv("PORT"))
 
 	err := r.Run()
 	if err != nil {
 		// log.Error("error at starting server")
 	}
-
 }
