@@ -10,16 +10,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var Log *logger.Loga = &logger.Log
+
 func init() {
 	inits.EnvInit()
+	logger.New()
 	inits.ConnectDB()
 	inits.DoTablesDB()
 }
 
 func main() {
-	// init my logger "loga"
-	loga := logger.New()
-	loga.Warn("DEV Level")
+
+	// logger
+	// Log := logger.Log
+	Log.Warn("DEV Level")
 
 	// Полностью отключаем вывод Gin
 	gin.DefaultWriter = io.Discard
@@ -30,7 +34,7 @@ func main() {
 	r.POST("/users", handlers.Signup)                // ready
 	r.POST("/users/{id}/notes", handlers.CreateNote) // TODO
 
-	loga.Info("Server started", "port =", os.Getenv("PORT"))
+	Log.Info("Server started", "port =", os.Getenv("PORT"))
 
 	err := r.Run()
 	if err != nil {

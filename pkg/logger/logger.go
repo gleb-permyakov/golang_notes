@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var Log Loga
+
 type Level string
 
 const (
@@ -69,9 +71,9 @@ func (l *Loga) Warn(msg string, args ...interface{}) {
 	}
 }
 
-func New() *Loga {
+func New() {
 	envType := os.Getenv("ENV")
-	return &Loga{
+	Log = Loga{
 		envLevel:    Level(envType),
 		infoLogger:  log.New(os.Stderr, "[INFO] ", 0),
 		debugLogger: log.New(os.Stderr, "[DEBUG] ", 0),
@@ -129,6 +131,8 @@ func typeAsserter(arrArgs *[]string, a *interface{}) {
 	case string:
 		*arrArgs = append(*arrArgs, (*a).(string))
 	case int:
+		*arrArgs = append(*arrArgs, fmt.Sprintf("%d", (*a).(int)))
+	case int64:
 		*arrArgs = append(*arrArgs, fmt.Sprintf("%d", (*a).(int)))
 	case float64:
 		*arrArgs = append(*arrArgs, fmt.Sprintf("%f", (*a).(float64)))

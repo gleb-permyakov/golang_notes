@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 	"notes/inits"
 	"notes/internal/models"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +15,8 @@ import (
 
 func Signup(c *gin.Context) {
 
+	t := time.Now()
+
 	var body struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
@@ -23,12 +25,11 @@ func Signup(c *gin.Context) {
 	// read body
 	err := c.Bind(&body)
 	if err != nil {
-		c.JSON(400, gin.H{
+		res_code := 400
+		c.JSON(res_code, gin.H{
 			"error": "failed to read body",
 		})
-
-		slog.Error(c.FullPath(), slog.String("method", c.Request.Method))
-
+		Log.Error("failed to read body", c.Request.Method, c.Request.URL.Path, "-", res_code, errors[res_code], strconv.FormatInt(time.Since(t).Milliseconds(), 10), "ms")
 		return
 	}
 
@@ -37,18 +38,22 @@ func Signup(c *gin.Context) {
 	inits.DB.First(&user, "username = ?", body.Username)
 
 	if user.ID != 0 {
-		c.JSON(403, gin.H{
+		res_code := 403
+		c.JSON(res_code, gin.H{
 			"error": "this username is already taken",
 		})
+		Log.Error("this username is already taken", c.Request.Method, c.Request.URL.Path, "-", res_code, errors[res_code], strconv.FormatInt(time.Since(t).Milliseconds(), 10), "ms")
 		return
 	}
 
 	// hash pwd
 	hashed_pwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
-		c.JSON(400, gin.H{
+		resp_code := 400
+		c.JSON(resp_code, gin.H{
 			"error": "failed to hash password",
 		})
+		Log.Error("failed to hash password", c.Request.Method, c.Request.URL.Path, "-", resp_code, errors[resp_code], strconv.FormatInt(time.Since(t).Milliseconds(), 10), "ms")
 		return
 	}
 
@@ -65,9 +70,11 @@ func Signup(c *gin.Context) {
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
-		c.JSON(400, gin.H{
+		resp_code := 400
+		c.JSON(resp_code, gin.H{
 			"error": "error in signing jwt",
 		})
+		Log.Error("error in signing jwt", c.Request.Method, c.Request.URL.Path, "-", resp_code, errors[resp_code], strconv.FormatInt(time.Since(t).Milliseconds(), 10), "ms")
 		return
 	}
 
@@ -76,6 +83,8 @@ func Signup(c *gin.Context) {
 	c.SetCookie("Auth", tokenString, 3600*24*30, "", "", false, true)
 
 	// OK
-	c.JSON(200, gin.H{})
+	resp_code := 200
+	c.JSON(resp_code, gin.H{})
+	Log.Info("", c.Request.Method, c.Request.URL.Path, "-", resp_code, errors[resp_code], strconv.FormatInt(time.Since(t).Milliseconds(), 10), "ms")
 
 }
