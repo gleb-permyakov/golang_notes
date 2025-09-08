@@ -4,7 +4,6 @@ import (
 	"notes/inits"
 	"notes/internal"
 	"notes/internal/models"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,38 +30,9 @@ func CreateNote(c *gin.Context) {
 		return
 	}
 
-	// get ID from JWT
-	id_jwt, exists := c.Get("userID")
-	if !exists {
-		res_code := 500
-		res_msg := "no userID in context"
-		c.JSON(res_code, gin.H{
-			"error": internal.Errors[res_code],
-		})
-		Log.Error(res_msg, internal.LoggerParams(c, res_code, t)...)
-		return
-	}
-
-	// get ID PATH
-	i_id_path, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		res_code := 404
-		res_msg := "must be integer ID"
-		c.JSON(res_code, gin.H{
-			"error": internal.Errors[res_code],
-		})
-		Log.Error(res_msg, internal.LoggerParams(c, res_code, t)...)
-		return
-	}
-
 	// compare ID
-	if id_jwt.(float64) != float64(i_id_path) {
-		res_code := 403
-		res_msg := "invalid ID"
-		c.JSON(res_code, gin.H{
-			"error": internal.Errors[res_code],
-		})
-		Log.Error(res_msg, internal.LoggerParams(c, res_code, t)...)
+	i_id_path, err := internal.CompareIDjwtPath(c, t)
+	if err != nil {
 		return
 	}
 
@@ -79,10 +49,10 @@ func CreateNote(c *gin.Context) {
 		Log.Error(res_msg+" cannot create the note", internal.LoggerParams(c, res_code, t)...)
 		return
 	} else {
-		res_code := 200
+		res_code := 201
 		res_msg := "created note"
 		c.JSON(res_code, gin.H{
-			"error": res_msg,
+			"message": res_msg,
 		})
 		Log.Info(res_msg, internal.LoggerParams(c, res_code, t)...)
 		return

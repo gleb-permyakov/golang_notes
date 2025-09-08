@@ -34,6 +34,10 @@ func main() {
 
 	r.POST("/users", handlers.Signup)                                     // ready
 	r.POST("/users/:id/notes", middleware.CheckAuth, handlers.CreateNote) // ready
+	r.GET("/users/:id/notes", middleware.CheckAuth, handlers.GetNotes)    // ready
+	r.GET("/users/:id/notes/:note_id", middleware.CheckAuth)              // TODO
+	r.PUT("/users/:id/notes/:note_id", middleware.CheckAuth)              // TODO
+	r.DELETE("/users/:id/notes/:note_id", middleware.CheckAuth)           // TODO
 
 	Log.Info("Server started", "port =", os.Getenv("PORT"))
 
