@@ -4,6 +4,7 @@ import (
 	"io"
 	"notes/inits"
 	"notes/internal/handlers"
+	"notes/internal/middleware"
 	"notes/pkg/logger"
 	"os"
 
@@ -31,8 +32,8 @@ func main() {
 
 	r := gin.New()
 
-	r.POST("/users", handlers.Signup)                // ready
-	r.POST("/users/{id}/notes", handlers.CreateNote) // TODO
+	r.POST("/users", handlers.Signup)                                     // ready
+	r.POST("/users/:id/notes", middleware.CheckAuth, handlers.CreateNote) // ready
 
 	Log.Info("Server started", "port =", os.Getenv("PORT"))
 
