@@ -52,7 +52,7 @@ func Signup(c *gin.Context) {
 	}
 
 	// hash pwd
-	hashed_pwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	hashed_pwd, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
 		res_code := 400
 		res_msg := "failed to hash password"
@@ -103,7 +103,7 @@ func Signup(c *gin.Context) {
 	res_msg := "signed up successfully"
 	c.JSON(res_code, gin.H{
 		"message": res_msg,
-		"user_id": result.RowsAffected,
+		// "user_id": ,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 

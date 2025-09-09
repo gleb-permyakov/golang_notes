@@ -33,14 +33,14 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	// get hached pwd from db
+	// get hashed pwd from db
 	var user models.User
 	result := inits.DB.Where("username = ?", body.Username).
 		Find(&user)
 
-	if result != nil {
+	if result.Error != nil {
 		res_code := 400
-		res_msg := "incorrect username or password"
+		res_msg := "incorrect username"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
@@ -54,7 +54,7 @@ func SignIn(c *gin.Context) {
 	err = bcrypt.CompareHashAndPassword([]byte(hashed_pwd), []byte(body.Password))
 	if err != nil {
 		res_code := 400
-		res_msg := "incorrect username or password"
+		res_msg := "incorrect password"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
@@ -69,14 +69,14 @@ func SignIn(c *gin.Context) {
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(os.Getenv("SECRET"))
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
 		res_code := 500
 		res_msg := "internal error"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
-		Log.Error("error in signing jwt", internal.LoggerParams(c, res_code, t)...)
+		Log.Error("error in signing jwt "+err.Error(), internal.LoggerParams(c, res_code, t)...)
 		return
 	}
 

@@ -83,7 +83,6 @@ func PutNote(c *gin.Context) {
 		"new_title":   note.Title,
 		"new_content": note.Content,
 		"updated_at":  note.UpdatedAt,
-		"note_id":     result.RowsAffected,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 

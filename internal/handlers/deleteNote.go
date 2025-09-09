@@ -49,7 +49,6 @@ func DeleteNote(c *gin.Context) {
 	res_msg := "note deleted"
 	c.JSON(res_code, gin.H{
 		"message": res_msg,
-		"note_id": result.RowsAffected,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 

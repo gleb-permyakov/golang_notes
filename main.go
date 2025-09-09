@@ -36,13 +36,13 @@ func main() {
 
 	r := gin.New()
 
-	r.POST("/users", handlers.Signup)                                                // ready
-	r.POST("/users/signin", handlers.SignIn)                                         // ready
-	r.POST("/users/:id/notes", middleware.CheckAuth, handlers.CreateNote)            // ready
-	r.GET("/users/:id/notes", middleware.CheckAuth, handlers.GetNotes)               // ready
-	r.GET("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.GetNote)       // ready
-	r.PUT("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.PutNote)       // ready
-	r.DELETE("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.DeleteNote) // ready
+	r.POST("/users", handlers.Signup)                                                // sign up
+	r.POST("/users/signin", handlers.SignIn)                                         // sign in
+	r.POST("/users/:id/notes", middleware.CheckAuth, handlers.CreateNote)            // create note
+	r.GET("/users/:id/notes", middleware.CheckAuth, handlers.GetNotes)               // get notes
+	r.GET("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.GetNote)       // get note
+	r.PUT("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.PutNote)       // update note
+	r.DELETE("/users/:id/notes/:note_id", middleware.CheckAuth, handlers.DeleteNote) // delete note
 
 	Log.Info("Server started", "port =", os.Getenv("PORT"))
 
