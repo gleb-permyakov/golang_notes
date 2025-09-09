@@ -9,5 +9,5 @@ type Note struct {
 	Content   string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	User      User `gorm:"foreignKey:User_id;references:ID"`
+	// User      User `gorm:"foreignKey:User_id;references:ID"`
 }

@@ -53,6 +53,6 @@ func GetNote(c *gin.Context) {
 	c.JSON(res_code, gin.H{
 		"note": note,
 	})
-	Log.Error("", internal.LoggerParams(c, res_code, t)...)
+	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 
 }
