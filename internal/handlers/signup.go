@@ -103,7 +103,7 @@ func Signup(c *gin.Context) {
 	res_msg := "signed up successfully"
 	c.JSON(res_code, gin.H{
 		"message": res_msg,
-		// "user_id": ,
+		"user_id": newUser.ID,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 
