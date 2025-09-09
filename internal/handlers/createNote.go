@@ -53,6 +53,7 @@ func CreateNote(c *gin.Context) {
 		res_msg := "created note"
 		c.JSON(res_code, gin.H{
 			"message": res_msg,
+			"note_id": result.RowsAffected,
 		})
 		Log.Info(res_msg, internal.LoggerParams(c, res_code, t)...)
 		return

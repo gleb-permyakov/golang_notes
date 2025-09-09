@@ -5,7 +5,6 @@ import (
 	"notes/inits"
 	"notes/internal"
 	"notes/internal/models"
-	"notes/pkg/logger"
 	"os"
 	"time"
 
@@ -14,22 +13,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var Log *logger.Loga = &logger.Log
-
-func Signup(c *gin.Context) {
-
+func SignIn(c *gin.Context) {
 	t := time.Now()
 
+	// get username and pwd
 	var body struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 
-	// read body
 	err := c.Bind(&body)
 	if err != nil {
 		res_code := 400
-		res_msg := "failed to read body"
+		res_msg := "invalid body"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
@@ -37,13 +33,14 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// ckeck if exists
+	// get hached pwd from db
 	var user models.User
-	inits.DB.First(&user, "username = ?", body.Username)
+	result := inits.DB.Where("username = ?", body.Username).
+		Find(&user)
 
-	if user.ID != 0 {
-		res_code := 403
-		res_msg := "this username is already taken"
+	if result != nil {
+		res_code := 400
+		res_msg := "incorrect username or password"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
@@ -51,11 +48,13 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// hash pwd
-	hashed_pwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	hashed_pwd := user.Password
+
+	// compare pwd
+	err = bcrypt.CompareHashAndPassword([]byte(hashed_pwd), []byte(body.Password))
 	if err != nil {
 		res_code := 400
-		res_msg := "failed to hash password"
+		res_msg := "incorrect username or password"
 		c.JSON(res_code, gin.H{
 			"error": res_msg,
 		})
@@ -63,27 +62,14 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// add new user
-	newUser := models.User{Username: body.Username, Password: string(hashed_pwd)}
-	result := inits.DB.Create(&newUser)
-	if result.Error != nil {
-		res_code := 500
-		res_msg := "internal error"
-		c.JSON(res_code, gin.H{
-			"error": res_msg,
-		})
-		Log.Error("can not create user", internal.LoggerParams(c, res_code, t)...)
-		return
-	}
-
-	// add jwt
+	// make jwt
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": newUser.ID,
+		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	tokenString, err := token.SignedString(os.Getenv("SECRET"))
 	if err != nil {
 		res_code := 500
 		res_msg := "internal error"
@@ -94,16 +80,16 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// Give cookie with jwt
+	// give cookie
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Auth", tokenString, 3600*24*30, "", "", false, true)
 
 	// OK
 	res_code := 200
-	res_msg := "signed up successfully"
+	res_msg := "signed in successfully"
 	c.JSON(res_code, gin.H{
 		"message": res_msg,
-		"user_id": result.RowsAffected,
+		"user_id": user.ID,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 

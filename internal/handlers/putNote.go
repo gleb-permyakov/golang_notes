@@ -14,7 +14,7 @@ func PutNote(c *gin.Context) {
 	t := time.Now()
 
 	// compare ID
-	i_ID, err := internal.CompareIDjwtPath(c, t)
+	_, err := internal.CompareIDjwtPath(c, t)
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func PutNote(c *gin.Context) {
 
 	// find the note
 	var note models.Note
-	inits.DB.Where("user_id = ? and id = ?", i_ID, i_note_id).
+	inits.DB.Where("id = ?", i_note_id).
 		First(&note)
 
 	// update note data
@@ -65,15 +65,25 @@ func PutNote(c *gin.Context) {
 	note.UpdatedAt = time.Now()
 
 	// put the note
-	inits.DB.Save(&note)
+	result := inits.DB.Save(&note)
+	if result.Error != nil {
+		res_code := 500
+		res_msg := "internal error"
+		c.JSON(res_code, gin.H{
+			"error": res_msg,
+		})
+		Log.Error("can not put the note", internal.LoggerParams(c, res_code, t)...)
+		return
+	}
 
 	res_code := 200
 	res_msg := "note updated"
 	c.JSON(res_code, gin.H{
-		"error":       res_msg,
+		"message":     res_msg,
 		"new_title":   note.Title,
 		"new_content": note.Content,
 		"updated_at":  note.UpdatedAt,
+		"note_id":     result.RowsAffected,
 	})
 	Log.Info("", internal.LoggerParams(c, res_code, t)...)
 
